@@ -1,0 +1,28 @@
+import userEvent from '@testing-library/user-event';
+import { render, screen, within } from '@testing-library/vue';
+import { beforeAll, describe, it } from 'vitest';
+import { createAppPlugin } from '../src/app/bootstrap/bootstrap-app-plugin';
+import App from '../src/app/components/App.vue';
+import router from '../src/app/router/index.ts';
+
+describe('Player authentication', () => {
+  beforeAll(() => {
+    render(App, {
+      global: {
+        plugins: [createAppPlugin({ router })],
+      },
+    });
+  });
+  it('shows login page when sign-in navigation link is clicked', async () => {
+    const mainNavigation = screen.getByRole('navigation', {
+      name: /Main navigation/i,
+    });
+    const signInNavigationLink = within(mainNavigation).getByRole('link', {
+      name: /Sign in/i,
+    });
+
+    await userEvent.click(signInNavigationLink);
+
+    expect(window.location.pathname).toBe('/sign-in');
+  });
+});
