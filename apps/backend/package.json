@@ -1,0 +1,27 @@
+{
+  "name": "@game-platform/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsc-watch --onSuccess 'node dist/main.js'",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@nestjs/common": "catalog:",
+    "@nestjs/config": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/platform-express": "catalog:",
+    "reflect-metadata": "catalog:",
+    "rxjs": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsc-watch": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

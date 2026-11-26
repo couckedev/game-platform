@@ -1,0 +1,65 @@
+name: Integration
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-project
+      - run: pnpm build
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-project
+      - run: pnpm typecheck
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-project
+      - run: pnpm test
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node-project
+      - run: pnpm lint
+
+  docker-build:
+    name: Docker build and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f apps/backend/Dockerfile -t game-platform-backend .
+      - run: docker build -f apps/frontend/Dockerfile -t game-platform-frontend .
+      - run: |
+          docker run --rm --detach --name game-platform-backend -p 3000:3000 game-platform-backend
+          docker run --rm --detach --name game-platform-frontend -p 8080:80 game-platform-frontend
+          for attempt in {1..20}; do
+            if curl --fail http://localhost:3000/ready && curl --fail http://localhost:8080/ready; then
+              docker stop game-platform-frontend
+              docker stop game-platform-backend
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs game-platform-backend
+          docker logs game-platform-frontend
+          docker stop game-platform-frontend || true
+          docker stop game-platform-backend || true
+          exit 1

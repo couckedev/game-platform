@@ -1,0 +1,55 @@
+name: Publish Unstable Docker
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v4
+        id: changed
+        with:
+          base: ${{ github.ref }}
+          filters: .github/filters/docker-images.yml
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.changed.outputs.backend == 'true' || steps.changed.outputs.frontend == 'true'
+
+      - uses: docker/login-action@v3
+        if: steps.changed.outputs.backend == 'true' || steps.changed.outputs.frontend == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        if: steps.changed.outputs.backend == 'true'
+        with:
+          context: .
+          file: apps/backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-backend:unstable
+            ghcr.io/${{ github.repository }}-backend:sha-${{ github.sha }}
+
+      - uses: docker/build-push-action@v6
+        if: steps.changed.outputs.frontend == 'true'
+        with:
+          context: .
+          file: apps/frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-frontend:unstable
+            ghcr.io/${{ github.repository }}-frontend:sha-${{ github.sha }}

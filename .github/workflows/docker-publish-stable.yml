@@ -1,0 +1,67 @@
+name: Publish Stable Docker
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: base
+        name: Find previous release tag
+        shell: bash
+        run: |
+          previous_tag="$(git describe --tags --match 'v*' --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || true)"
+          has_previous=false
+          if [[ -n "$previous_tag" ]]; then
+            has_previous=true
+          fi
+          echo "ref=$previous_tag" >> "$GITHUB_OUTPUT"
+          echo "has_previous=$has_previous" >> "$GITHUB_OUTPUT"
+
+      - uses: dorny/paths-filter@v4
+        id: changed
+        with:
+          base: ${{ steps.base.outputs.ref }}
+          filters: .github/filters/docker-images.yml
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.base.outputs.has_previous != 'true' || steps.changed.outputs.backend == 'true' || steps.changed.outputs.frontend == 'true'
+
+      - uses: docker/login-action@v3
+        if: steps.base.outputs.has_previous != 'true' || steps.changed.outputs.backend == 'true' || steps.changed.outputs.frontend == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        if: steps.base.outputs.has_previous != 'true' || steps.changed.outputs.backend == 'true'
+        with:
+          context: .
+          file: apps/backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-backend:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}-backend:latest
+
+      - uses: docker/build-push-action@v6
+        if: steps.base.outputs.has_previous != 'true' || steps.changed.outputs.frontend == 'true'
+        with:
+          context: .
+          file: apps/frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-frontend:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}-frontend:latest

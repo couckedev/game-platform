@@ -1,0 +1,24 @@
+{
+  "name": "game-platform",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write --unsafe",
+    "format": "biome format . --write",
+    "clean:hard": "find . -type d \\( -name dist -o -name node_modules \\) -prune -exec rm -rf {} +",
+    "dev:frontend": "pnpm --filter @game-platform/frontend dev",
+    "dev:backend": "pnpm --filter @game-platform/backend dev"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "devDependencies": {
+    "@biomejs/biome": "catalog:"
+  }
+}

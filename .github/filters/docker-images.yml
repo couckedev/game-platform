@@ -1,0 +1,16 @@
+backend:
+  - "apps/backend/**"
+  - "package.json"
+  - "pnpm-lock.yaml"
+  - "pnpm-workspace.yaml"
+  - ".npmrc"
+  - ".dockerignore"
+  - "tsconfig.base.json"
+frontend:
+  - "apps/frontend/**"
+  - "package.json"
+  - "pnpm-lock.yaml"
+  - "pnpm-workspace.yaml"
+  - ".npmrc"
+  - ".dockerignore"
+  - "tsconfig.base.json"
