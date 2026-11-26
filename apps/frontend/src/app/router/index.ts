@@ -1,13 +1,16 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import HomePage from '../pages/HomePage.vue';
-import SignInPage from '../pages/SignInPage.vue';
+import {
+  createRouter,
+  type RouteRecordRaw,
+  type RouterHistory,
+} from 'vue-router';
+import { HomePage, SignInPage } from '@/app/pages';
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    { path: '/', name: 'home', component: async () => HomePage },
-    { path: '/sign-in', name: 'sign-in', component: async () => SignInPage },
-  ],
-});
+export const routes: RouteRecordRaw[] = [
+  { path: '/', name: 'home', component: async () => HomePage },
+  { path: '/sign-in', name: 'sign-in', component: async () => SignInPage },
+];
 
-export default router;
+export function createAppRouter(history: RouterHistory) {
+  const router = createRouter({ history, routes });
+  return router;
+}
