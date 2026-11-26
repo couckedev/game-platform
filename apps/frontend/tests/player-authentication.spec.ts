@@ -21,6 +21,13 @@ async function navigateToSignInPage() {
   await userEvent.click(signInNavigationLink);
 }
 
+async function clickOnGoogleSignInButton() {
+  const gogoleSignInButton = screen.getByRole('button', {
+    name: /Sign in with Google/i,
+  });
+  await userEvent.click(gogoleSignInButton);
+}
+
 async function openApp() {
   const router = createAppRouter(createWebHistory());
   const plugin = createAppPlugin({
@@ -57,6 +64,18 @@ describe('Player authentication', () => {
     expect(
       screen.getByRole('button', {
         name: /Sign in with Google/i,
+      }),
+    ).toBeInstanceOf(HTMLElement);
+  });
+
+  it('shows player registration form if unregistered player has signed in', async () => {
+    await navigateToSignInPage();
+
+    await clickOnGoogleSignInButton();
+
+    expect(
+      screen.getByRole('form', {
+        name: /Join game platform/i,
       }),
     ).toBeInstanceOf(HTMLElement);
   });
